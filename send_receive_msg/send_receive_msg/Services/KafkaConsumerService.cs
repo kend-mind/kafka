@@ -1,5 +1,7 @@
 ﻿using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using Newtonsoft.Json;
+using System.Dynamic;
 using static Confluent.Kafka.ConfigPropertyNames;
 
 namespace send_receive_msg.Services
@@ -38,7 +40,9 @@ namespace send_receive_msg.Services
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var consumeResult = _consumer.Consume(cancellationToken);
-                    Console.WriteLine($"Received message: {consumeResult.Message.Value}");
+                    dynamic receiveValue = JsonConvert.DeserializeObject<ExpandoObject>(consumeResult.Message.Value);
+                    Console.WriteLine($"Received message: {receiveValue.ReceiveMessage}");
+                    Console.WriteLine($"Received object: {consumeResult.Message.Value}");
                 }
             }
             catch (OperationCanceledException)

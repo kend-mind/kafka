@@ -7,11 +7,13 @@ namespace send_receive_msg.Controllers
     [Route("api/[controller]")]
     public class KafkaController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
         private readonly IKafkaProducerService _producerService;
 
-        public KafkaController(IKafkaProducerService producerService)
+        public KafkaController(IKafkaProducerService producerService, IConfiguration configuration)
         {
             _producerService = producerService;
+            _configuration = configuration;
         }
 
         [HttpPost("send")]
@@ -24,6 +26,14 @@ namespace send_receive_msg.Controllers
 
             await _producerService.SendMessageAsync(message);
             return Ok($"Message '{message}' sent successfully to current topic.");
+        }
+
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteTopic([FromQuery] string topicName)
+        {
+            var kafkaTopic = new KafkaTopicService(_configuration);
+            await kafkaTopic.DeleteTopicAsync(topicName);
+            return Ok($"Topic {topicName} deleted successfully.");
         }
     }
 }

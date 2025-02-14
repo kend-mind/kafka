@@ -45,6 +45,7 @@ namespace send_receive_msg.Services
                 obj.Id = 10;
                 obj.Email = "xxxxx@gmail.com";
                 obj.Description = "Email from google";
+                obj.ReceiveMessage = message;
                 var _obj = JsonConvert.SerializeObject(obj);
                 await _producer.ProduceAsync(_topic, new Message<Null, string> { Value = _obj });
                 Console.WriteLine($"Message Object '{_obj}' sent to topic '{_topic}'.");

@@ -39,16 +39,16 @@ namespace send_receive_msg.Services
                     };
 
                     await adminClient.CreateTopicsAsync(newTopics);
-                    Console.WriteLine($"✅ Topic '{_topic}' đã được tạo.");
+                    Console.WriteLine($"Topic '{_topic}' created.");
                 }
                 else
                 {
-                    Console.WriteLine($"⚡ Topic '{_topic}' đã tồn tại.");
+                    Console.WriteLine($"Topic '{_topic}' is existed.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Lỗi khi kiểm tra/tạo topic: {ex.Message}");
+                Console.WriteLine($"Error when check/create topic: {ex.Message}");
             }
         }
 
@@ -64,6 +64,24 @@ namespace send_receive_msg.Services
             {
                 Console.WriteLine(ex.Message);
                 throw;
+            }
+        }
+
+        public async Task DeleteTopicAsync(string topicName)
+        {
+            var config = new AdminClientConfig { BootstrapServers = _bootstrapServers };
+
+            using var adminClient = new AdminClientBuilder(config).Build();
+
+            try
+            {
+                Console.WriteLine($"Deleting topic: {topicName}...");
+                await adminClient.DeleteTopicsAsync(new[] { topicName });
+                Console.WriteLine($"Topic {topicName} deleted successfully.");
+            }
+            catch (DeleteTopicsException e)
+            {
+                Console.WriteLine($"Failed to delete topic {topicName}: {e.Results[0].Error.Reason}");
             }
         }
     }
