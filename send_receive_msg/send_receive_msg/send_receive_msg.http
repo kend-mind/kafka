@@ -1,0 +1,6 @@
+@send_receive_msg_HostAddress = http://localhost:5112
+
+GET {{send_receive_msg_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
