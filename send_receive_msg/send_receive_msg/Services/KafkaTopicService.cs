@@ -15,7 +15,8 @@ namespace send_receive_msg.Services
             _topic = configuration["Kafka:Topic"];
         }
 
-        async Task EnsureTopicExistsAsync()
+        // Method to send message to Kafka topic
+        public void CreateTopicAsync()
         {
             using var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = _bootstrapServers }).Build();
 
@@ -38,7 +39,7 @@ namespace send_receive_msg.Services
                         new() { Name = _topic, NumPartitions = 1, ReplicationFactor = 1 }
                     };
 
-                    await adminClient.CreateTopicsAsync(newTopics);
+                    adminClient.CreateTopicsAsync(newTopics);
                     Console.WriteLine($"Topic '{_topic}' created.");
                 }
                 else
@@ -49,20 +50,6 @@ namespace send_receive_msg.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error when check/create topic: {ex.Message}");
-            }
-        }
-
-        // Method to send message to Kafka topic
-        public void CreateTopicAsync()
-        {
-            try
-            {
-                // Đảm bảo topic tồn tại trước khi gửi
-                EnsureTopicExistsAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
                 throw;
             }
         }

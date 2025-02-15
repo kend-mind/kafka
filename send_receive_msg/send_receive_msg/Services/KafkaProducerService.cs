@@ -48,7 +48,7 @@ namespace send_receive_msg.Services
                 obj.ReceiveMessage = message;
                 var _obj = JsonConvert.SerializeObject(obj);
                 await _producer.ProduceAsync(_topic, new Message<Null, string> { Value = _obj });
-                Console.WriteLine($"Message Object '{_obj}' sent to topic '{_topic}'.");
+                Console.WriteLine($"Message object '{_obj}' sent to topic '{_topic}'.");
             }
             catch (Exception ex)
             {
