@@ -1,0 +1,71 @@
+﻿# Manual setup ##########################################################################################################################################################################
+00_Install Java (JDK)
+	Kafka requires Java 11 or later.
+01_download kafka (Binary downloads)
+	https://kafka.apache.org/downloads
+02_extract to: C:\services\kafka, add new folders
+	zookeeper
+	kafka-logs
+	logs
+
+	add env (System variables): 
+		Biến môi trường KAFKA_HOME giúp bạn chạy Kafka từ bất kỳ thư mục nào trong Command Prompt (CMD) hoặc PowerShell mà không cần di chuyển vào thư mục Kafka.
+		KAFKA_HOME ~ C:\services\kafka
+		ZOOKEEPER_HOME ~ C:/services/kafka/zookeeper
+		add path: %KAFKA_HOME%\bin\windows & %ZOOKEEPER_HOME%\bin\windows
+
+		=> Khởi động lại máy tính hoặc chạy lệnh sau trong PowerShell để áp dụng thay đổi ngay:
+			$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
+
+03_modified config\zookeeper.properties
+	dataDir=C:/services/kafka/zookeeper
+04_modified config\server.properties
+	log.dirs=C:/services/kafka/kafka-logs
+05_Start Zookeeper (Keep this window open.)
+	.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+06_Start Kafka Broker
+	.\bin\windows\kafka-server-start.bat .\config\server.properties
+07_Stop Kafka and Zookeeper
+	.\bin\windows\kafka-server-stop.bat
+	.\bin\windows\zookeeper-server-stop.bat
+08_Auto-start Kafka on Windows, Create a .bat file in C:\services\kafka\start-zookeeper-kafka.bat:
+	start /min cmd /c "C:\kafka\bin\windows\zookeeper-server-start.bat C:\kafka\config\zookeeper.properties"
+	timeout /t 5
+	start /min cmd /c "C:\kafka\bin\windows\kafka-server-start.bat C:\kafka\config\server.properties"
+
+	==> Add this batch file to Task Scheduler for auto-start on boot.
+
+Example:
+	Create a Kafka Topic: .\bin\windows\kafka-topics.bat --create --topic test-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+	Send and Receive Messages
+		Start a Producer (send messages) - Type messages and press Enter.: .\bin\windows\kafka-console-producer.bat --topic test-topic --bootstrap-server localhost:9092
+		Start a Consumer (receive messages): .\bin\windows\kafka-console-consumer.bat --topic test-topic --from-beginning --bootstrap-server localhost:9092
+
+(Optional) Use KRaft Mode (Kafka Without Zookeeper)
+Kafka 3.0+ allows running without Zookeeper.
+	01_Edit config\kraft\server.properties and configure the log.dirs path.
+	02_Format storage with a unique cluster ID:
+		.\bin\windows\kafka-storage.bat format -t <your-cluster-id> -c config\kraft\server.properties
+	03_Start Kafka in KRaft mode:
+		.\bin\windows\kafka-server-start.bat config\kraft\server.properties
+
+# Run KAFKA as windows service via NSSM (https://nssm.cc/download)##########################################################################################################################
+01: create windows service
+	nssm install Zookeeper "C:\services\kafka\bin\windows\zookeeper-server-start.bat" "C:\services\kafka\config\zookeeper.properties"
+	nssm install Kafka "C:\services\kafka\bin\windows\kafka-server-start.bat" "C:\services\kafka\config\server.properties"
+	Set-Service -Name "Kafka" -StartupType AutomaticDelayedStart
+02: add description windows service
+	nssm set Zookeeper Description "Apache Zookeeper is a distributed management and orchestration system that helps Kafka manage nodes in the cluster, maintain metadata, and ensure high availability."
+	nssm set Kafka Description "Apache Kafka Message Broker, Distributed Event Streaming Platform"
+
+03: Stop kafka/zoomkeeper service
+	net stop Kafka
+	net stop Zookeeper
+
+04: remove kafka/zoomkeeper service
+	nssm remove Kafka confirm
+	nssm remove Zookeeper confirm
+
+# Add schedule task via PowerShell ##########################################################################################################################################################
+	Start-Process -NoNewWindow -FilePath "C:\services\kafka\bin\windows\zookeeper-server-start.bat" -ArgumentList "..\..\config\zookeeper.properties"
+	Start-Process -NoNewWindow -FilePath "C:\services\kafka\bin\windows\kafka-server-start.bat" -ArgumentList "..\..\config\server.properties"
