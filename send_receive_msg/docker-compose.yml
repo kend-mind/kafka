@@ -1,0 +1,6 @@
+services:
+  send_receive_msg:
+    image: ${DOCKER_REGISTRY-}sendreceivemsg
+    build:
+      context: .
+      dockerfile: send_receive_msg\Dockerfile
