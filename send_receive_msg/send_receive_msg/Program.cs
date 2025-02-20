@@ -32,4 +32,6 @@ var kafkaConsumer = new KafkaConsumerService(app.Services.GetRequiredService<ICo
 var cancellationTokenSource = new CancellationTokenSource();
 Task.Run(() => kafkaConsumer.ListeningAsync(cancellationTokenSource.Token));
 
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
 app.Run();
